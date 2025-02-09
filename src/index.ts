@@ -1,10 +1,9 @@
 import { registerPlugin } from '@capacitor/core';
 
-import type { PhoneHintPlugin } from './definitions';
+export interface PhoneHintPlugin {
+  getPhoneNumber(): Promise<{ phoneNumber: string }>;
+}
 
-const PhoneHint = registerPlugin<PhoneHintPlugin>('PhoneHint', {
-  web: () => import('./web').then((m) => new m.PhoneHintWeb()),
-});
+const PhoneNumber = registerPlugin<PhoneHintPlugin>('PhoneHint');
 
-export * from './definitions';
-export { PhoneHint };
+export default PhoneNumber;
