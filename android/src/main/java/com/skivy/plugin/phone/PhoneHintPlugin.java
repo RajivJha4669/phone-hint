@@ -1,54 +1,57 @@
-package com.skivy.plugin.phone;
+package com.iqbalfn.capacitor.phonehint;
+
+import android.content.IntentSender;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.util.Log;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-
-import com.getcapacitor.BridgeActivity;
-
-import com.google.android.gms.auth.api.phone.PhoneAuthOptions;
-import com.google.android.gms.auth.api.phone.SmsRetriever;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.auth.api.identity.GetPhoneNumberHintIntentRequest;
+import com.google.android.gms.auth.api.identity.Identity;
 
 @CapacitorPlugin(name = "PhoneHint")
 public class PhoneHintPlugin extends Plugin {
+    ActivityResultLauncher<IntentSenderRequest> launcher;
+    PluginCall call;
 
-   private static final int REQUEST_PHONE_PICKER = 1001;
-    
-    @PluginMethod
-    public void getPhoneNumber(com.getcapacitor.PluginCall call) {
-        Activity activity = getActivity();
-
-        Intent intent = SmsRetriever.getClient(activity).getHintPickerIntent(
-            new PhoneAuthOptions.Builder()
-        );
-
-        startActivityForResult(call, intent, REQUEST_PHONE_PICKER);
-    }
 
     @Override
-    protected void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PHONE_PICKER) {
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                String phoneNumber = data.getStringExtra("phone");
-                JSObject ret = new JSObject();
-                ret.put("phoneNumber", phoneNumber);
-                notifyListeners("onPhoneNumberFetched", ret);
-            } else {
-                notifyListeners("onPhoneNumberFetched", null);
-            }
-        }
+    public void load() {
+        launcher = bridge.registerForActivityResult(
+                new ActivityResultContracts.StartIntentSenderForResult(),
+                result -> {
+                    try {
+                        String phone = Identity.getSignInClient(getActivity())
+                                .getPhoneNumberFromIntent(result.getData());
+                        JSObject ret = new JSObject();
+                        ret.put("phone", phone);
+                        call.resolve(ret);
+                    } catch (Exception e) {
+                        call.reject(e.getLocalizedMessage());
+                    }
+                }
+        );
+    }
+
+    @PluginMethod
+    public void requestHint(PluginCall call) {
+        this.call = call;
+        GetPhoneNumberHintIntentRequest request = GetPhoneNumberHintIntentRequest.builder().build();
+
+        Identity.getSignInClient(getActivity())
+                .getPhoneNumberHintIntent(request)
+                .addOnFailureListener(e -> {
+                    call.reject(e.getLocalizedMessage());
+                })
+                .addOnSuccessListener(result -> {
+                    IntentSender intent = result.getIntentSender();
+                    IntentSenderRequest.Builder builder = new IntentSenderRequest.Builder(intent);
+                    launcher.launch(builder.build());
+                });
     }
 }

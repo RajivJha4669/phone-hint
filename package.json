@@ -1,6 +1,6 @@
 {
   "name": "skivy-phone-hint",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "This plugin will help us fetch User's phone number using Google's Phone-hint API",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

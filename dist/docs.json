@@ -6,19 +6,48 @@
     "tags": [],
     "methods": [
       {
-        "name": "getPhoneNumber",
-        "signature": "() => Promise<{ phoneNumber: string; }>",
+        "name": "requestHint",
+        "signature": "() => Promise<PhoneNumber>",
         "parameters": [],
-        "returns": "Promise<{ phoneNumber: string; }>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [],
-        "slug": "getphonenumber"
+        "returns": "Promise<PhoneNumber>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          }
+        ],
+        "docs": "Request the phone number dialog picker",
+        "complexTypes": [
+          "PhoneNumber"
+        ],
+        "slug": "requesthint"
       }
     ],
     "properties": []
   },
-  "interfaces": [],
+  "interfaces": [
+    {
+      "name": "PhoneNumber",
+      "slug": "phonenumber",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "phone",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "Picket phone number",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    }
+  ],
   "enums": [],
   "typeAliases": [],
   "pluginConfigs": []
