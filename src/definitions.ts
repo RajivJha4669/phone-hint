@@ -1,3 +1,3 @@
 export interface PhoneHintPlugin {
-  echo(options: { value: string }): Promise<{ value: string }>;
+  getPhoneNumber(): Promise<{ phoneNumber: string }>;
 }
